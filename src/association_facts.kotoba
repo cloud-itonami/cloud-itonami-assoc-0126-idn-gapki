@@ -1,0 +1,76 @@
+(ns association-facts
+  (:export [main association-covered? entry-count entry-field topic-count
+            topic by-topic-count by-topic-id coverage-note]))
+
+(defn association-covered? [association :string] :i64
+  (string=? association "gapki"))
+
+(defn entry-count [association :string] :i64
+  (if (association-covered? association) 2 0))
+
+(defn valid-entry? [association :string index :i64] :i64
+  (if (association-covered? association)
+    (if (= index 0) 1 (if (= index 1) 1 0))
+    0))
+
+(defn entry-field [association :string index :i64 field :string]
+  [:option :string]
+  (if (valid-entry? association index)
+    (if (= index 0)
+      (cond
+        (string=? field "id") (option-some-of [:option :string] "gapki.founding-1981")
+        (string=? field "title") (option-some-of [:option :string] "GAPKI founding (GAPKI History)")
+        (string=? field "association") (option-some-of [:option :string] "gapki")
+        (string=? field "isic") (option-some-of [:option :string] "0126")
+        (string=? field "country") (option-some-of [:option :string] "IDN")
+        (string=? field "kind") (option-some-of [:option :string] "governance-program")
+        (string=? field "url") (option-some-of [:option :string] "https://gapki.id/en/gapki-history/")
+        (string=? field "url-provenance") (option-some-of [:option :string] "official-gapki-id")
+        (string=? field "established-date") (option-some-of [:option :string] "1981-02-27")
+        (string=? field "retrieved-at") (option-some-of [:option :string] "2026-07-16")
+        :else (option-none-of [:option :string]))
+      (cond
+        (string=? field "id") (option-some-of [:option :string] "gapki.45-tahun-gapki-book-2026")
+        (string=? field "title") (option-some-of [:option :string] "'45 Tahun GAPKI untuk Negeri' history book presented at 45th anniversary")
+        (string=? field "association") (option-some-of [:option :string] "gapki")
+        (string=? field "isic") (option-some-of [:option :string] "0126")
+        (string=? field "country") (option-some-of [:option :string] "IDN")
+        (string=? field "kind") (option-some-of [:option :string] "governance-program")
+        (string=? field "url") (option-some-of [:option :string] "https://gapki.id/en/news/2026/05/05/gapki-releases-palm-history-book-recounting-ris-catch-up-with-malaysia/")
+        (string=? field "url-provenance") (option-some-of [:option :string] "official-gapki-id")
+        (string=? field "established-date") (option-some-of [:option :string] "2026-04-29")
+        (string=? field "retrieved-at") (option-some-of [:option :string] "2026-07-16")
+        :else (option-none-of [:option :string])))
+    (option-none-of [:option :string])))
+
+(defn topic-count [association :string index :i64] :i64
+  (if (valid-entry? association index) 1 0))
+
+(defn topic [association :string index :i64 topic-index :i64]
+  [:option :string]
+  (if (valid-entry? association index)
+    (if (= topic-index 0)
+      (option-some-of [:option :string] "governance")
+      (option-none-of [:option :string]))
+    (option-none-of [:option :string])))
+
+(defn by-topic-count [association :string candidate :string] :i64
+  (if (association-covered? association)
+    (if (string=? candidate "governance") 2 0)
+    0))
+
+(defn by-topic-id [association :string candidate :string index :i64]
+  [:option :string]
+  (if (string=? candidate "governance")
+    (if (valid-entry? association index)
+      (entry-field association index "id")
+      (option-none-of [:option :string]))
+    (option-none-of [:option :string])))
+
+(defn coverage-note [association :string] [:option :string]
+  (if (association-covered? association)
+    (option-some-of [:option :string]
+      "cloud-itonami-assoc-0126-idn-gapki Wave 0 (ADR-2607141700): 2 gapki entries seeded with an official gapki.id citation. Extend the sovereign catalog; never fabricate a rule id/url.")
+    (option-none-of [:option :string])))
+
+(defn main [] :i64 0)
