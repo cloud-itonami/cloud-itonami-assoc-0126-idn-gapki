@@ -3,7 +3,7 @@
             [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
-            [kotoba.compiler.ir :as ir]))
+            [kotoba.kir :as ir]))
 
 (def source (slurp "src/association_facts.kotoba"))
 (defn call [kir function & args] (ir/execute kir function (vec args)))
@@ -44,8 +44,8 @@
                                        fields)))
                        (range (call kir 'entry-count "gapki")))]
     (is (= expected observed))
-    (is (= 1 (call kir 'association-covered? "gapki")))
-    (is (zero? (call kir 'association-covered? "vnba")))
+    (is (true? (call kir 'association-covered? "gapki")))
+    (is (false? (call kir 'association-covered? "vnba")))
     (is (= [1 1] (mapv #(call kir 'topic-count "gapki" %) [0 1])))
     (is (= ["governance" "governance"]
            (mapv #(present (call kir 'topic "gapki" % 0)) [0 1])))
@@ -81,7 +81,7 @@
                "const j=await import('data:text/javascript;base64," js64 "');"
                "const w=await host.instantiateKotoba(Buffer.from(process.argv[2],'base64'));"
                "const run=x=>{"
-               "if(x['association-covered?']('gapki')!==1n||x['association-covered?']('vnba')!==0n)throw Error('covered');"
+               "if(x['association-covered?']('gapki')!==true||x['association-covered?']('vnba')!==false)throw Error('covered');"
                "if(x['entry-count']('gapki')!==2n||x['entry-count']('vnba')!==0n)throw Error('count');"
                "if(x['entry-field']('gapki',0n,'id')[2]!=='gapki.founding-1981')throw Error('first');"
                "if(x['entry-field']('gapki',1n,'established-date')[2]!=='2026-04-29')throw Error('second');"
